@@ -1,0 +1,29 @@
+{
+  "name": "Peppol SDK | Ademico API",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
+  // "dockerComposeFile": "docker-compose.yml",
+	// "service": "app",
+  // https://github.com/microsoft/vscode-remote-release/issues/6472
+  "initializeCommand": "echo LOCAL_WORKSPACE_FOLDER_BASENAME=${localWorkspaceFolderBasename} > .devcontainer/.env",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  // https://containers.dev/features
+  "features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "containerEnv": {
+    "SHELL": "/bin/bash"
+  },
+  "remoteUser": "vscode",
+  "containerUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "patcx.vscode-nuget-gallery",
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.vscodeintellicode-csharp"
+      ]
+    }
+  }
+  // "postCreateCommand": "bash .devcontainer/postCreateCommand.sh"
+}
