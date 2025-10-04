@@ -47,6 +47,12 @@ kiota generate -l CSharp --clean-output \
     --include-path /api/peppol/v1/invoice-responses
 ```
 
+## Build & publish as a NuGet package
+
+```
+dotnet pack ./Peppol.Ademico.Kiota/Peppol.Ademico.Kiota.csproj 
+```
+
 ## Links
 
 - [Kiota - The NEW OpenAPI Client Generator](https://www.youtube.com/watch?v=nk9BUPKgN_k&ab_channel=GuiFerreira)
