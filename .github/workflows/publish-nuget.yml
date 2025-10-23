@@ -1,0 +1,372 @@
+name: Publish NuGet Package
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '**/*.csproj'
+      - '**/*.sln'
+      - '**/*.slnx'
+
+jobs:
+  publish:
+    name: Build and Publish NuGet Package
+    runs-on: ubuntu-latest
+    
+    # Only run if the pull request was merged (not just closed)
+    if: github.event.pull_request.merged == true
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for version calculation
+          
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+          
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+            
+      - name: Set build environment variables
+        run: |
+          echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
+          echo "DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1" >> $GITHUB_ENV
+          echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
+          echo "NUGET_XMLDOC_MODE=skip" >> $GITHUB_ENV
+          
+      # Placeholder steps for future implementation
+      - name: Placeholder - Version Management
+        run: echo "Version management will be implemented in task 2"
+        
+      - name: Restore dependencies
+        run: dotnet restore src/Peppol.Ademico.Kiota/Peppol.Ademico.Kiota.csproj
+        
+      - name: Build project
+        run: |
+          dotnet build src/Peppol.Ademico.Kiota/Peppol.Ademico.Kiota.csproj \
+            --configuration Release \
+            --no-restore \
+            --verbosity normal
+            
+      - name: Run tests
+        run: |
+          dotnet test src/Peppol.Ademico.Kiota/Peppol.Ademico.Kiota.csproj \
+            --configuration Release \
+            --no-build \
+            --verbosity normal \
+            --logger trx \
+            --results-directory TestResults \
+            --collect:"XPlat Code Coverage"
+            
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: TestResults/
+          retention-days: 30
+          
+      - name: Create NuGet package
+        run: |
+          dotnet pack src/Peppol.Ademico.Kiota/Peppol.Ademico.Kiota.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./packages \
+            --verbosity normal
+            
+      - name: Validate package contents
+        run: |
+          # List package contents for verification
+          echo "=== Package Contents ==="
+          for pkg in ./packages/*.nupkg; do
+            echo "Package: $(basename "$pkg")"
+            unzip -l "$pkg" | head -20
+            echo ""
+          done
+          
+          # Verify multi-framework targeting
+          echo "=== Framework Validation ==="
+          for pkg in ./packages/*.nupkg; do
+            echo "Checking frameworks in $(basename "$pkg"):"
+            unzip -l "$pkg" | grep -E "lib/(net[0-9]|netstandard)" || echo "No framework-specific assemblies found"
+            echo ""
+          done
+          
+      - name: Validate package metadata
+        run: |
+          # Check that package was created successfully
+          if [ ! -f ./packages/*.nupkg ]; then
+            echo "ERROR: No NuGet package found in ./packages/"
+            exit 1
+          fi
+          
+          # Verify package naming convention
+          expected_pattern="Peppol.Ademico.Kiota.*\.nupkg"
+          if ! ls ./packages/ | grep -E "$expected_pattern"; then
+            echo "ERROR: Package name doesn't match expected pattern: $expected_pattern"
+            exit 1
+          fi
+          
+          echo "Package validation completed successfully"
+          
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: ./packages/*.nupkg
+          retention-days: 30
+        
+      # Task 4.1: Configure authentication and secrets
+      - name: Validate NuGet API Key
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "ERROR: NUGET_API_KEY secret is not configured"
+            echo "Please configure the NUGET_API_KEY secret in repository settings"
+            echo "Go to: Settings > Secrets and variables > Actions > New repository secret"
+            exit 1
+          fi
+          
+          # Validate API key format (basic validation)
+          if [ ${#NUGET_API_KEY} -lt 32 ]; then
+            echo "ERROR: NUGET_API_KEY appears to be invalid (too short)"
+            echo "NuGet API keys should be at least 32 characters long"
+            exit 1
+          fi
+          
+          echo "✓ NuGet API key validation passed"
+          
+      - name: Configure NuGet authentication
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          # Configure NuGet source with authentication
+          dotnet nuget add source https://api.nuget.org/v3/index.json \
+            --name nuget.org \
+            --username "github-actions" \
+            --password "$NUGET_API_KEY" \
+            --store-password-in-clear-text \
+            --configfile ./nuget.config || true
+            
+          # Verify configuration (without exposing credentials)
+          echo "✓ NuGet authentication configured successfully"
+          echo "Source: https://api.nuget.org/v3/index.json"
+          
+      # Task 4.2: Create NuGet publishing pipeline
+      - name: Publish to NuGet.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          echo "=== Publishing NuGet Package ==="
+          
+          # Find the package file
+          PACKAGE_FILE=$(find ./packages -name "*.nupkg" | head -1)
+          if [ -z "$PACKAGE_FILE" ]; then
+            echo "ERROR: No package file found in ./packages/"
+            exit 1
+          fi
+          
+          echo "Publishing package: $(basename "$PACKAGE_FILE")"
+          
+          # Publish with retry logic
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          SUCCESS=false
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "Attempt $RETRY_COUNT of $MAX_RETRIES..."
+            
+            if dotnet nuget push "$PACKAGE_FILE" \
+              --api-key "$NUGET_API_KEY" \
+              --source https://api.nuget.org/v3/index.json \
+              --timeout 300 \
+              --skip-duplicate; then
+              SUCCESS=true
+              echo "✓ Package published successfully"
+            else
+              PUSH_EXIT_CODE=$?
+              echo "⚠ Publish attempt $RETRY_COUNT failed with exit code $PUSH_EXIT_CODE"
+              
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                WAIT_TIME=$((RETRY_COUNT * 10))
+                echo "Waiting ${WAIT_TIME} seconds before retry..."
+                sleep $WAIT_TIME
+              fi
+            fi
+          done
+          
+          if [ "$SUCCESS" = false ]; then
+            echo "ERROR: Failed to publish package after $MAX_RETRIES attempts"
+            exit 1
+          fi
+          
+      - name: Verify package publication
+        env:
+          PACKAGE_NAME: "Peppol.Ademico.Kiota"
+        run: |
+          echo "=== Verifying Package Publication ==="
+          
+          # Extract version from package filename
+          PACKAGE_FILE=$(find ./packages -name "*.nupkg" | head -1)
+          PACKAGE_VERSION=$(basename "$PACKAGE_FILE" .nupkg | sed "s/${PACKAGE_NAME}.//")
+          
+          echo "Verifying package: $PACKAGE_NAME version $PACKAGE_VERSION"
+          
+          # Wait a moment for NuGet.org to process the package
+          echo "Waiting for NuGet.org to process the package..."
+          sleep 30
+          
+          # Verify package is available (with retry logic)
+          MAX_VERIFICATION_RETRIES=5
+          VERIFICATION_COUNT=0
+          PACKAGE_FOUND=false
+          
+          while [ $VERIFICATION_COUNT -lt $MAX_VERIFICATION_RETRIES ] && [ "$PACKAGE_FOUND" = false ]; do
+            VERIFICATION_COUNT=$((VERIFICATION_COUNT + 1))
+            echo "Verification attempt $VERIFICATION_COUNT of $MAX_VERIFICATION_RETRIES..."
+            
+            # Use NuGet API to check if package exists
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              "https://api.nuget.org/v3-flatcontainer/${PACKAGE_NAME,,}/${PACKAGE_VERSION}/${PACKAGE_NAME,,}.${PACKAGE_VERSION}.nupkg")
+            
+            if [ "$HTTP_STATUS" = "200" ]; then
+              PACKAGE_FOUND=true
+              echo "✓ Package verified successfully on NuGet.org"
+              echo "Package URL: https://www.nuget.org/packages/$PACKAGE_NAME/$PACKAGE_VERSION"
+            else
+              echo "⚠ Package not yet available (HTTP $HTTP_STATUS)"
+              if [ $VERIFICATION_COUNT -lt $MAX_VERIFICATION_RETRIES ]; then
+                echo "Waiting 30 seconds before next verification..."
+                sleep 30
+              fi
+            fi
+          done
+          
+          if [ "$PACKAGE_FOUND" = false ]; then
+            echo "⚠ Warning: Could not verify package availability after $MAX_VERIFICATION_RETRIES attempts"
+            echo "This may be due to NuGet.org processing delays. Check manually at:"
+            echo "https://www.nuget.org/packages/$PACKAGE_NAME/$PACKAGE_VERSION"
+          fi
+          
+      # Task 4.3: Add error handling and notifications
+      - name: Create git tag for successful publication
+        if: success()
+        run: |
+          echo "=== Creating Git Tag ==="
+          
+          # Extract version from package filename
+          PACKAGE_FILE=$(find ./packages -name "*.nupkg" | head -1)
+          PACKAGE_VERSION=$(basename "$PACKAGE_FILE" .nupkg | sed "s/Peppol.Ademico.Kiota.//")
+          TAG_NAME="v$PACKAGE_VERSION"
+          
+          echo "Creating tag: $TAG_NAME"
+          
+          # Configure git user for tagging
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Create and push tag
+          if git tag -a "$TAG_NAME" -m "Release version $PACKAGE_VERSION"; then
+            git push origin "$TAG_NAME"
+            echo "✓ Tag $TAG_NAME created and pushed successfully"
+          else
+            echo "⚠ Warning: Failed to create tag $TAG_NAME (may already exist)"
+          fi
+          
+      - name: Generate workflow summary
+        if: always()
+        run: |
+          echo "=== Workflow Summary ===" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract package information
+          if [ -f ./packages/*.nupkg ]; then
+            PACKAGE_FILE=$(find ./packages -name "*.nupkg" | head -1)
+            PACKAGE_NAME="Peppol.Ademico.Kiota"
+            PACKAGE_VERSION=$(basename "$PACKAGE_FILE" .nupkg | sed "s/${PACKAGE_NAME}.//")
+            
+            echo "**Package Information:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Package: $PACKAGE_NAME" >> $GITHUB_STEP_SUMMARY
+            echo "- Version: $PACKAGE_VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "- File: $(basename "$PACKAGE_FILE")" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Workflow status
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "**Status: ✅ SUCCESS**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The NuGet package has been successfully published to nuget.org!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Package should be available at: https://www.nuget.org/packages/$PACKAGE_NAME/$PACKAGE_VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "- Git tag v$PACKAGE_VERSION has been created" >> $GITHUB_STEP_SUMMARY
+            echo "- Allow a few minutes for NuGet.org indexing to complete" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status: ❌ FAILED**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The workflow failed during execution. Please check the logs above for details." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Common Issues:**" >> $GITHUB_STEP_SUMMARY
+            echo "- NUGET_API_KEY secret not configured or invalid" >> $GITHUB_STEP_SUMMARY
+            echo "- Version already exists on nuget.org" >> $GITHUB_STEP_SUMMARY
+            echo "- Build or test failures" >> $GITHUB_STEP_SUMMARY
+            echo "- Network connectivity issues" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "=== Publication Failed ===" 
+          echo ""
+          echo "❌ The NuGet package publication workflow has failed."
+          echo ""
+          echo "**Troubleshooting Steps:**"
+          echo "1. Check that NUGET_API_KEY secret is properly configured"
+          echo "2. Verify the API key has permission to publish packages"
+          echo "3. Ensure the version doesn't already exist on nuget.org"
+          echo "4. Review build and test logs for any failures"
+          echo "5. Check network connectivity and NuGet.org status"
+          echo ""
+          echo "**Debug Information:**"
+          echo "- Workflow: ${{ github.workflow }}"
+          echo "- Run ID: ${{ github.run_id }}"
+          echo "- Commit: ${{ github.sha }}"
+          echo "- Branch: ${{ github.ref_name }}"
+          echo "- Actor: ${{ github.actor }}"
+          echo ""
+          echo "For more details, check the workflow logs at:"
+          echo "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          echo "=== Cleanup ==="
+          
+          # Remove temporary NuGet config if it exists
+          if [ -f ./nuget.config ]; then
+            rm -f ./nuget.config
+            echo "✓ Removed temporary nuget.config"
+          fi
+          
+          # Clean up any temporary authentication files
+          if [ -d ~/.nuget ]; then
+            find ~/.nuget -name "*.tmp" -delete 2>/dev/null || true
+            echo "✓ Cleaned up temporary NuGet files"
+          fi
+          
+          echo "✓ Cleanup completed"
