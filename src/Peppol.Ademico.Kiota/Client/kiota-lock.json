@@ -1,8 +1,8 @@
 {
-  "descriptionHash": "FC88D8A49E93B4192F6431581370E2CB8DC26751B2EF0E2B8898084ED2F1BFF6BB71C0C5D0BD642CF51148E2AFD218AA2C79DACB7F9F76D16063667F1D51BF44",
-  "descriptionLocation": "../OpenApi/v1_7.json",
+  "descriptionHash": "CABEAB32396F9A9BBF1E5F2DBAAFB0D5CD239E85FE23A2733AD102823D7F8025B2CC420A44804CFA898F91D52024AA66849D28E1727B8E6BF497035ABC822712",
+  "descriptionLocation": "../OpenApi/v1_9.json",
   "lockFileVersion": "1.0.0",
-  "kiotaVersion": "1.28.0",
+  "kiotaVersion": "1.29.0",
   "clientClassName": "PeppolAdemicoApiClient",
   "typeAccessModifier": "Public",
   "clientNamespaceName": "Peppol.Ademico.Kiota",

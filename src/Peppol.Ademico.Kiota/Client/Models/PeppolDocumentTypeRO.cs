@@ -19,6 +19,10 @@ namespace Peppol.Ademico.Kiota.Models
         #pragma warning disable CS1591
         ORDER,
         #pragma warning restore CS1591
+        [EnumMember(Value = "ORDER_ADVANCED")]
+        #pragma warning disable CS1591
+        ORDER_ADVANCED,
+        #pragma warning restore CS1591
         [EnumMember(Value = "SG_ORDER_BALANCE")]
         #pragma warning disable CS1591
         SG_ORDER_BALANCE,

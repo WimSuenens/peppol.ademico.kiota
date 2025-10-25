@@ -15,6 +15,14 @@ namespace Peppol.Ademico.Kiota.Models
         #pragma warning disable CS1591
         PEPPOL_BIS_BILLING_UBL_CREDIT_NOTE_V3,
         #pragma warning restore CS1591
+        [EnumMember(Value = "PEPPOL_BIS_SELF_BILLING_UBL_INVOICE_V3")]
+        #pragma warning disable CS1591
+        PEPPOL_BIS_SELF_BILLING_UBL_INVOICE_V3,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "PEPPOL_BIS_SELF_BILLING_UBL_CREDIT_NOTE_V3")]
+        #pragma warning disable CS1591
+        PEPPOL_BIS_SELF_BILLING_UBL_CREDIT_NOTE_V3,
+        #pragma warning restore CS1591
         [EnumMember(Value = "XRECHNUNG_UBL_INVOICE_V3_0")]
         #pragma warning disable CS1591
         XRECHNUNG_UBL_INVOICE_V3_0,

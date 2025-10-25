@@ -100,7 +100,7 @@ namespace Peppol.Ademico.Kiota.Models
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
         public static global::Peppol.Ademico.Kiota.Models.NotificationRO CreateFromDiscriminatorValue(IParseNode parseNode)
         {
-            _ = parseNode ?? throw new ArgumentNullException(nameof(parseNode));
+            if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
             var mappingValue = parseNode.GetChildNode("")?.GetStringValue();
             var result = new global::Peppol.Ademico.Kiota.Models.NotificationRO();
             if("InvoiceReceivingNotificationRO".Equals(mappingValue, StringComparison.OrdinalIgnoreCase))
@@ -199,7 +199,7 @@ namespace Peppol.Ademico.Kiota.Models
         /// <param name="writer">Serialization writer to use to serialize this model</param>
         public virtual void Serialize(ISerializationWriter writer)
         {
-            _ = writer ?? throw new ArgumentNullException(nameof(writer));
+            if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             if(InvoiceReceivingNotificationRO != null)
             {
                 writer.WriteObjectValue<global::Peppol.Ademico.Kiota.Models.InvoiceReceivingNotificationRO>(null, InvoiceReceivingNotificationRO);
