@@ -53,6 +53,30 @@ kiota generate -l CSharp --clean-output \
 dotnet pack ./Peppol.Ademico.Kiota/Peppol.Ademico.Kiota.csproj 
 ```
 
+## CI/CD Pipeline
+
+This repository includes an automated CI/CD pipeline that publishes NuGet packages when pull requests are merged to the main branch.
+
+### Setup Requirements
+
+To enable automated publishing, you need to configure GitHub Secrets:
+
+- **[GitHub Secrets Setup Guide](docs/github-secrets-setup.md)** - Complete setup instructions
+- **[Quick Reference](docs/secrets-quick-reference.md)** - Quick setup checklist
+
+### How It Works
+
+1. When a PR is merged to main, the workflow automatically:
+   - Increments the package version based on commit messages
+   - Builds and tests the package
+   - Publishes to nuget.org
+   - Creates a git tag with the new version
+
+2. Version increment rules:
+   - **Patch** (default): Regular commits
+   - **Minor**: Commits with `feat:` prefix or `enhancement` PR label
+   - **Major**: Commits with `BREAKING CHANGE:` or `breaking-change` PR label
+
 ## Links
 
 - [Kiota - The NEW OpenAPI Client Generator](https://www.youtube.com/watch?v=nk9BUPKgN_k&ab_channel=GuiFerreira)
