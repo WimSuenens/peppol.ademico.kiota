@@ -34,7 +34,7 @@ namespace Peppol.Ademico.Kiota.Api.Peppol.V1.Invoices.UblSubmissions
         {
         }
         /// <summary>
-        /// The invoice/credit note is scheduled in the queue to be sent to the Buyer. The UBL is validated before is being sent.You get notified either via pull or push mechanism when the invoice/credit note has be received by the Buyer. See below for possible validation errors you can get.
+        /// The invoice/credit note is scheduled in the queue to be sent to the receiver. The UBL is validated before is being sent.You get notified either via pull or push mechanism when the invoice/credit note has be received by the receiver. &lt;/br&gt;&lt;/br&gt; For a standard invoice/credit note, the Seller sends the document to the Buyer. For a self-billing invoice or credit note, the Buyer sends the document to the Seller.
         /// </summary>
         /// <returns>A <see cref="global::Peppol.Ademico.Kiota.Models.DocumentSubmissionResult"/></returns>
         /// <param name="body">The request body</param>
@@ -51,7 +51,7 @@ namespace Peppol.Ademico.Kiota.Api.Peppol.V1.Invoices.UblSubmissions
         public async Task<global::Peppol.Ademico.Kiota.Models.DocumentSubmissionResult> PostAsync(global::Peppol.Ademico.Kiota.Api.Peppol.V1.Invoices.UblSubmissions.UblSubmissionsPostRequestBody body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
-            _ = body ?? throw new ArgumentNullException(nameof(body));
+            if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
@@ -61,7 +61,7 @@ namespace Peppol.Ademico.Kiota.Api.Peppol.V1.Invoices.UblSubmissions
             return await RequestAdapter.SendAsync<global::Peppol.Ademico.Kiota.Models.DocumentSubmissionResult>(requestInfo, global::Peppol.Ademico.Kiota.Models.DocumentSubmissionResult.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <summary>
-        /// The invoice/credit note is scheduled in the queue to be sent to the Buyer. The UBL is validated before is being sent.You get notified either via pull or push mechanism when the invoice/credit note has be received by the Buyer. See below for possible validation errors you can get.
+        /// The invoice/credit note is scheduled in the queue to be sent to the receiver. The UBL is validated before is being sent.You get notified either via pull or push mechanism when the invoice/credit note has be received by the receiver. &lt;/br&gt;&lt;/br&gt; For a standard invoice/credit note, the Seller sends the document to the Buyer. For a self-billing invoice or credit note, the Buyer sends the document to the Seller.
         /// </summary>
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>
@@ -75,7 +75,7 @@ namespace Peppol.Ademico.Kiota.Api.Peppol.V1.Invoices.UblSubmissions
         public RequestInformation ToPostRequestInformation(global::Peppol.Ademico.Kiota.Api.Peppol.V1.Invoices.UblSubmissions.UblSubmissionsPostRequestBody body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
-            _ = body ?? throw new ArgumentNullException(nameof(body));
+            if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
             var requestInfo = new RequestInformation(Method.POST, UrlTemplate, PathParameters);
             requestInfo.Configure(requestConfiguration);
             requestInfo.Headers.TryAdd("Accept", "application/json");
