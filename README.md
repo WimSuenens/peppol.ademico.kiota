@@ -7,7 +7,7 @@
 
 ## Setup
 
-To get started set your Ademico ClientId and ClientSercet in your environment variables.
+To get started set your Ademico ClientId and ClientSecret in your environment variables.
 
 ```.env
 Ademico__Client__Id=YOUR_ADEMICO_CLIENT_ID
