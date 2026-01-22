@@ -15,6 +15,10 @@ namespace Peppol.Ademico.Kiota.Models
         #pragma warning disable CS1591
         CREDIT_NOTE,
         #pragma warning restore CS1591
+        [EnumMember(Value = "CII_INVOICE")]
+        #pragma warning disable CS1591
+        CII_INVOICE,
+        #pragma warning restore CS1591
         [EnumMember(Value = "ORDER")]
         #pragma warning disable CS1591
         ORDER,

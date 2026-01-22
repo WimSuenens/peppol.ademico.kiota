@@ -48,7 +48,7 @@ namespace Peppol.Ademico.Kiota.Api.Peppol.V1.Notifications
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public NotificationsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/peppol/v1/notifications{?documentId*,endDateTime*,eventType*,page*,pageSize*,peppolDocumentType*,receiver*,sender*,startDateTime*,transmissionId*}", pathParameters)
+        public NotificationsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/peppol/v1/notifications{?documentId*,endDateTime*,eventType*,page*,pageSize*,peppolDocumentType*,receiver*,sender*,sort*,startDateTime*,transmissionId*}", pathParameters)
         {
         }
         /// <summary>
@@ -56,7 +56,7 @@ namespace Peppol.Ademico.Kiota.Api.Peppol.V1.Notifications
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public NotificationsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/peppol/v1/notifications{?documentId*,endDateTime*,eventType*,page*,pageSize*,peppolDocumentType*,receiver*,sender*,startDateTime*,transmissionId*}", rawUrl)
+        public NotificationsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/peppol/v1/notifications{?documentId*,endDateTime*,eventType*,page*,pageSize*,peppolDocumentType*,receiver*,sender*,sort*,startDateTime*,transmissionId*}", rawUrl)
         {
         }
         /// <summary>
@@ -184,6 +184,16 @@ namespace Peppol.Ademico.Kiota.Api.Peppol.V1.Notifications
 #else
             [QueryParameter("sender")]
             public string Sender { get; set; }
+#endif
+            /// <summary>Whether to sort the results in ascending (&apos;asc&apos;) or descending (&apos;desc&apos;) order</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+            [QueryParameter("sort")]
+            public string? Sort { get; set; }
+#nullable restore
+#else
+            [QueryParameter("sort")]
+            public string Sort { get; set; }
 #endif
             /// <summary>The start date time of the period to filter the notifications. To filter all notifications for a specific time E.g. `2023-07-25T11:03:26.688Z` use `startDateTime=2023-07-25T11:03:26.688Z` and `endDateTime=2023-07-29T11:03:26.688Z</summary>
             [QueryParameter("startDateTime")]

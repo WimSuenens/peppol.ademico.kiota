@@ -34,7 +34,7 @@ kiota generate -l CSharp --clean-output \
     -c PeppolAdemicoApiClient  \
     -n Peppol.Ademico.Kiota  \
     -o ./Client  \
-    -d ./OpenApi/v1_9.json  \
+    -d ./OpenApi/v1_10.json  \
     --include-path /api/peppol/v1/tools/connectivity  \
     --include-path /api/peppol/v1/legal-entities  \
     --include-path /api/peppol/v1/legal-entities/*  \

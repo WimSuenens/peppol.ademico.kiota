@@ -21,9 +21,9 @@
         "ms-dotnettools.csharp",
         "patcx.vscode-nuget-gallery",
         "ms-dotnettools.csdevkit",
-        "ms-dotnettools.vscodeintellicode-csharp"
+        "github.copilot-chat"
       ]
     }
-  }
-  // "postCreateCommand": "bash .devcontainer/postCreateCommand.sh"
+  },
+  "postCreateCommand": "bash .devcontainer/postCreateCommand.sh"
 }
