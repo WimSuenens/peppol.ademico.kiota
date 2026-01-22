@@ -167,5 +167,61 @@ namespace Peppol.Ademico.Kiota.Models
         #pragma warning disable CS1591
         PEPPOL_PINT_CREDIT_NOTE_V1_0,
         #pragma warning restore CS1591
+        [EnumMember(Value = "FR_CII_INVOICE_CIUS_REGULATED")]
+        #pragma warning disable CS1591
+        FR_CII_INVOICE_CIUS_REGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_CII_INVOICE_CIUS_NONREGULATED")]
+        #pragma warning disable CS1591
+        FR_CII_INVOICE_CIUS_NONREGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_CII_INVOICE_EXTENSION_REGULATED")]
+        #pragma warning disable CS1591
+        FR_CII_INVOICE_EXTENSION_REGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_CII_INVOICE_EXTENSION_NONREGULATED")]
+        #pragma warning disable CS1591
+        FR_CII_INVOICE_EXTENSION_NONREGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_UBL_INVOICE_CIUS_REGULATED")]
+        #pragma warning disable CS1591
+        FR_UBL_INVOICE_CIUS_REGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_UBL_INVOICE_CIUS_NONREGULATED")]
+        #pragma warning disable CS1591
+        FR_UBL_INVOICE_CIUS_NONREGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_UBL_INVOICE_EXTENSION_REGULATED")]
+        #pragma warning disable CS1591
+        FR_UBL_INVOICE_EXTENSION_REGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_UBL_INVOICE_EXTENSION_NONREGULATED")]
+        #pragma warning disable CS1591
+        FR_UBL_INVOICE_EXTENSION_NONREGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_UBL_CREDIT_NOTE_CIUS_REGULATED")]
+        #pragma warning disable CS1591
+        FR_UBL_CREDIT_NOTE_CIUS_REGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_UBL_CREDIT_NOTE_CIUS_NONREGULATED")]
+        #pragma warning disable CS1591
+        FR_UBL_CREDIT_NOTE_CIUS_NONREGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_UBL_CREDIT_NOTE_EXTENSION_REGULATED")]
+        #pragma warning disable CS1591
+        FR_UBL_CREDIT_NOTE_EXTENSION_REGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_UBL_CREDIT_NOTE_EXTENSION_NONREGULATED")]
+        #pragma warning disable CS1591
+        FR_UBL_CREDIT_NOTE_EXTENSION_NONREGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_CDAR_REGULATED")]
+        #pragma warning disable CS1591
+        FR_CDAR_REGULATED,
+        #pragma warning restore CS1591
+        [EnumMember(Value = "FR_CDAR_NONREGULATED")]
+        #pragma warning disable CS1591
+        FR_CDAR_NONREGULATED,
+        #pragma warning restore CS1591
     }
 }
